@@ -1,0 +1,231 @@
+---
+const servicios = [
+  {
+    categoria: 'Fotografía editorial',
+    nombre: 'Editorial',
+    lema: 'Imágenes que viven en revistas.',
+    puntos: [
+      'Colaboración con marcas de moda y lifestyle',
+      'Dirección de arte desde el concepto hasta la entrega',
+      'Edición profesional con perfil de color personalizado',
+    ],
+    desc: 'Trabajos editoriales con narrativa visual fuerte, pensados para publicaciones impresas y digitales de alto nivel.',
+    icon: '<path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3V4z"></path><path d="M9 8h6M9 12h6M9 16h3"></path>',
+  },
+  {
+    categoria: 'Eventos & celebraciones',
+    nombre: 'Bodas',
+    lema: 'El día más importante, para siempre.',
+    puntos: [
+      'Cobertura completa del día sin interrupciones',
+      'Reportaje documental + sesión de retrato',
+      'Álbum impreso de edición limitada incluido',
+    ],
+    desc: 'Un enfoque discreto y emotivo para preservar cada instante auténtico, sin poses forzadas ni momentos perdidos.',
+    icon: '<path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"></path>',
+  },
+  {
+    categoria: 'Marca & producto',
+    nombre: 'Comercial',
+    lema: 'Tu marca, en su mejor luz.',
+    puntos: [
+      'Fotografía de producto sobre fondo y en contexto',
+      'Contenido para redes sociales y campañas digitales',
+      'Paquetes por licencia o uso ilimitado',
+    ],
+    desc: 'Imágenes que elevan la percepción de tu marca y generan confianza en cada punto de contacto con el cliente.',
+    icon: '<path d="M5 8h14l-1 12H6L5 8z"></path><path d="M9 8V6a3 3 0 016 0v2"></path>',
+  },
+];
+
+const informacion = [
+  {
+    label: 'Editorial & Moda',
+    valor: 'Desde €450',
+    icon: '<path d="M20 12l-8 8-9-9V4h7l10 8z"></path><circle cx="7.5" cy="8.5" r="1.2"></circle>',
+  },
+  {
+    label: 'Bodas',
+    valor: 'Consultar disponibilidad',
+    icon: '<rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 10h18M8 3v4M16 3v4"></path>',
+  },
+  {
+    label: 'Portafolio sesión',
+    valor: 'Desde €180',
+    icon: '<path d="M20 12l-8 8-9-9V4h7l10 8z"></path><circle cx="7.5" cy="8.5" r="1.2"></circle>',
+  },
+  {
+    label: 'Entrega',
+    valor: '5–10 días hábiles',
+    icon: '<circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path>',
+  },
+];
+
+const card =
+  'group relative overflow-hidden rounded-3xl border border-lime-700/60 bg-lime-900/10 p-6 shadow-xl ring-1 ring-lime-800 backdrop-blur-sm transition-colors duration-300 hover:border-lime-500';
+const spot =
+  'pointer-events-none absolute inset-0 z-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-[radial-gradient(280px_circle_at_var(--x,50%)_var(--y,50%),rgba(163,230,53,0.16),transparent_70%)]';
+const label = 'text-xs uppercase tracking-[0.2em] text-lime-500';
+const iconBox =
+  'grid size-11 shrink-0 place-items-center rounded-xl bg-lime-500/10 text-lime-500 ring-1 ring-lime-500/20';
+---
+
+<section id="servicios" data-services class="font-carter relative mx-auto w-full max-w-6xl scroll-mt-24 px-4 py-24">
+  <!-- Encabezado -->
+  <div data-reveal class="mb-10">
+    <h2 class="mt-2 text-4xl text-[#f4f3ef] md:text-5xl">
+      Servicios que ofrezco<span class="text-lime-400">.</span>
+    </h2>
+  </div>
+
+  <!-- TARJETAS DE SERVICIO -->
+  <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+    {servicios.map((s, i) => (
+      <article data-reveal data-spot class={`${card} flex flex-col`}>
+        <div class={spot}></div>
+
+        <!-- Número decorativo -->
+        <span class="pointer-events-none absolute top-3 right-5 z-0 text-7xl text-lime-400/10 transition-colors duration-300 group-hover:text-lime-400/20">
+          {String(i + 1).padStart(2, '0')}
+        </span>
+
+        <div class="relative z-10 flex h-full flex-col">
+          <span class={iconBox}>
+            <svg
+              width="25"
+              height="25"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+              set:html={s.icon}
+            />
+          </span>
+
+          <p class={`${label} mt-6`}>{s.categoria}</p>
+          <h3 class="mt-2 text-4xl text-[#f4f3ef]">{s.nombre}</h3>
+          <p class="mt-2 text-lg text-lime-400">{s.lema}</p>
+
+          <ul class="mt-6 flex list-none flex-col gap-3 p-0">
+            {s.puntos.map((p) => (
+              <li class="flex items-start gap-3 text-sm leading-relaxed text-white/85">
+                <svg
+                  class="mt-0.5 shrink-0 text-lime-400"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="12" r="9" stroke-opacity="0.4"></circle>
+                  <path d="M8 12.5l3 3 5-6"></path>
+                </svg>
+                <span>{p}</span>
+              </li>
+            ))}
+          </ul>
+
+          <p class="mt-6 border-t border-lime-700/40 pt-5 text-sm leading-relaxed text-white/60">
+            {s.desc}
+          </p>
+        </div>
+
+        <!-- Línea de acento que crece al pasar el cursor -->
+        <span class="absolute bottom-0 left-0 h-0.5 w-0 bg-lime-400 transition-all duration-500 group-hover:w-full"></span>
+      </article>
+    ))}
+  </div>
+
+  <!-- INFORMACIÓN -->
+  <article data-reveal class={`${card} mt-4`}>
+    <!-- Lente decorativo -->
+    <svg
+      class="pointer-events-none absolute -top-20 -right-20 size-72 animate-[spin_60s_linear_infinite] text-lime-400/10"
+      viewBox="0 0 100 100"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="0.8"
+      aria-hidden="true"
+    >
+      <circle cx="50" cy="50" r="46"></circle>
+      <circle cx="50" cy="50" r="34"></circle>
+      <circle cx="50" cy="50" r="20"></circle>
+      <circle cx="50" cy="50" r="7"></circle>
+      <path d="M50 4v30M50 66v30M4 50h30M66 50h30M17.5 17.5l21 21M61.5 61.5l21 21M82.5 17.5l-21 21M38.5 61.5l-21 21"></path>
+    </svg>
+
+    <div class="relative z-10">
+      <h3 class="text-2xl text-[#f4f3ef]">Información</h3>
+
+      <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {informacion.map((item) => (
+          <div
+            data-spot
+            class="group relative overflow-hidden rounded-2xl border border-lime-700/40 bg-black/20 p-5 transition-colors hover:border-lime-500/70"
+          >
+            <div class={spot}></div>
+            <div class="relative z-10">
+              <span class={iconBox}>
+                <svg
+                  width="25"
+                  height="25"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                  set:html={item.icon}
+                />
+              </span>
+              <p class={`${label} mt-4`}>{item.label}</p>
+              <p class="mt-2 text-xl text-lime-400 md:text-2xl">{item.valor}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </article>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const section = document.querySelector<HTMLElement>('[data-services]');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (section) {
+    // Luz que sigue al cursor dentro de cada tarjeta
+    section.querySelectorAll<HTMLElement>('[data-spot]').forEach((el) => {
+      el.addEventListener('pointermove', (e) => {
+        const r = el.getBoundingClientRect();
+        el.style.setProperty('--x', `${e.clientX - r.left}px`);
+        el.style.setProperty('--y', `${e.clientY - r.top}px`);
+      });
+    });
+
+    if (!reduceMotion) {
+      // Aparición escalonada al llegar con el scroll
+      gsap.from(section.querySelectorAll('[data-reveal]'), {
+        opacity: 0,
+        y: 30,
+        duration: 0.8,
+        stagger: 0.12,
+        ease: 'power3.out',
+        clearProps: 'all',
+        scrollTrigger: { trigger: section, start: 'top 75%', once: true },
+      });
+    }
+  }
+</script>

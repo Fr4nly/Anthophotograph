@@ -1,0 +1,313 @@
+---
+const FRAME_COUNT = 240;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<!-- ... tu contenido actual de presentación ... -->
+
+<section
+  id="animacion"
+  data-frame-scroll
+  data-frame-count={FRAME_COUNT}
+  data-base={base}
+  class="relative flex h-screen w-full items-center justify-center px-4"
+>
+  <!-- Tarjeta -->
+  <div
+    class="relative h-[77vh] w-full max-w-6xl overflow-hidden rounded-3xl border border-lime-700/60 bg-[#0b0d0f] shadow-2xl shadow-lime-900/30 ring-1 ring-lime-800"
+  >
+    <canvas class="absolute inset-0 h-full w-full"></canvas>
+
+    <div class="pointer-events-none absolute inset-0 bg-linear-to-t from-[#0b0d0f]/40 via-transparent to-transparent"></div>
+
+    <!-- Loader -->
+    <div
+      data-loader
+      class="absolute inset-0 z-10 grid place-items-center bg-[#0b0d0f] transition-opacity duration-500"
+    >
+      <p class="font-carter text-lime-400">
+        Cargando <span data-progress>0</span>%
+      </p>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
+
+  gsap.registerPlugin(ScrollToPlugin);
+
+  const DURATION = 3;     // segundos que tarda la animación completa (de 1er a último frame)
+  const SCROLL_TIME = 1;  // segundos del desplazamiento entre secciones
+
+  const section = document.querySelector<HTMLElement>('[data-frame-scroll]');
+
+  if (section) {
+    const canvas = section.querySelector<HTMLCanvasElement>('canvas')!;
+    const ctx = canvas.getContext('2d')!;
+    const loader = section.querySelector<HTMLElement>('[data-loader]')!;
+    const progressText = section.querySelector<HTMLElement>('[data-progress]')!;
+    const sobreMi = document.getElementById('sobre-mi');
+
+    const frameCount = Number(section.dataset.frameCount);
+    const last = frameCount - 1;
+    const base = section.dataset.base ?? '';
+    const frameSrc = (i: number) =>
+      `${base}/frames/ezgif-frame-${String(i + 1).padStart(3, '0')}.jpg`;
+
+    const images: HTMLImageElement[] = new Array(frameCount);
+    const state = { frame: 0 };
+    let lastDrawn = -1;
+
+    /*
+      Fases de la secuencia:
+      - loading: cargando frames
+      - idle:    quieto, sin nada en curso
+      - play:    la animación de frames está corriendo en el hero
+      - scroll:  la página se está desplazando entre secciones
+    */
+    type Phase = 'loading' | 'idle' | 'play' | 'scroll';
+    let phase: Phase = 'loading';
+    let cooldownUntil = 0;
+    let runId = 0; // cada navegación nueva invalida a la anterior
+    let frameTween: gsap.core.Tween | null = null;
+    let scrollTween: gsap.core.Tween | null = null;
+
+    history.scrollRestoration = 'manual';
+    window.scrollTo(0, 0);
+
+    /* ---------- Canvas ---------- */
+    function resizeCanvas() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = canvas.clientWidth * dpr;
+      canvas.height = canvas.clientHeight * dpr;
+      render(true);
+    }
+
+    function render(force = false) {
+      const index = Math.round(state.frame);
+      if (!force && index === lastDrawn) return;
+
+      const img = images[index];
+      if (!img || !img.complete || !img.naturalWidth) return;
+
+      const scale = Math.max(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight);
+      const w = img.naturalWidth * scale;
+      const h = img.naturalHeight * scale;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
+      lastDrawn = index;
+    }
+
+    /* ---------- Animaciones cancelables ---------- */
+    const isAtEnd = () => state.frame >= last - 0.5;
+
+    // Misma velocidad siempre: recorrido completo = DURATION, recorrido parcial = proporcional
+    const frameTime = (from: number, to: number) => (DURATION * Math.abs(to - from)) / last;
+
+    const tweenFrames = (to: number, duration: number) =>
+      new Promise<void>((resolve) => {
+        frameTween?.kill();
+        if (duration <= 0.01) {
+          state.frame = to;
+          render();
+          resolve();
+          return;
+        }
+        frameTween = gsap.to(state, {
+          frame: to,
+          duration,
+          ease: 'none',
+          onUpdate: () => render(),
+          onComplete: resolve,
+        });
+      });
+
+    const scrollToEl = (target: HTMLElement) =>
+      new Promise<void>((resolve) => {
+        scrollTween?.kill();
+        scrollTween = gsap.to(window, {
+          scrollTo: { y: target, autoKill: false },
+          duration: SCROLL_TIME,
+          ease: 'power2.inOut',
+          onComplete: resolve,
+        });
+      });
+
+    /* ---------- Navegación ---------- */
+    async function navigate(id: string) {
+      if (phase === 'loading') return;
+      const target = document.getElementById(id);
+      if (!target) return;
+
+      const interrupting = phase !== 'idle'; // ¿hay algo en curso que cortar?
+      const myRun = ++runId;
+      frameTween?.kill();
+      scrollTween?.kill();
+
+      const stale = () => myRun !== runId; // otra navegación tomó el control
+      const heroOffset = () => Math.abs(section!.getBoundingClientRect().top);
+
+      if (id === 'animacion') {
+        // Subir al hero (si estamos debajo) y reproducir la animación en reversa
+        if (heroOffset() > 2) {
+          phase = 'scroll';
+          await scrollToEl(section!);
+          if (stale()) return;
+        }
+        phase = 'play';
+        await tweenFrames(0, frameTime(state.frame, 0));
+        if (stale()) return;
+      } else {
+        // Sin nada en curso y animación sin completar: reproducirla antes de bajar
+        if (!interrupting && !isAtEnd()) {
+          if (heroOffset() > 2) {
+            phase = 'scroll';
+            await scrollToEl(section!);
+            if (stale()) return;
+          }
+          phase = 'play';
+          await tweenFrames(last, frameTime(state.frame, last));
+          if (stale()) return;
+        }
+
+        // Si se interrumpió, ir directo a la sección; los frames terminan mientras se desplaza
+        phase = 'scroll';
+        if (!isAtEnd()) tweenFrames(last, Math.min(SCROLL_TIME, frameTime(state.frame, last)));
+        await scrollToEl(target);
+        if (stale()) return;
+
+        frameTween?.kill();
+        state.frame = last;
+        render();
+      }
+
+      phase = 'idle';
+      cooldownUntil = performance.now() + 350;
+    }
+
+    /* ---------- Intención de scroll (rueda, teclado, táctil) ---------- */
+    const sobreMiTop = () =>
+      sobreMi ? sobreMi.getBoundingClientRect().top + window.scrollY : section.offsetHeight;
+
+    // Devuelve true si el evento debe bloquearse
+    function handleIntent(dir: 'down' | 'up'): boolean {
+      if (phase === 'loading') return true;
+
+      // Animación en curso en el hero: scroll abajo la corta y muestra "Sobre mí"
+      if (phase === 'play') {
+        if (dir === 'down') navigate('sobre-mi');
+        return true;
+      }
+
+      // Desplazándose entre secciones: ignorar el scroll del usuario
+      if (phase === 'scroll') return true;
+
+      if (performance.now() < cooldownUntil) return true;
+
+      // Hero con la animación sin completar: scroll abajo => animar y bajar
+      if (dir === 'down' && !isAtEnd() && window.scrollY < sobreMiTop() - 4) {
+        navigate('sobre-mi');
+        return true;
+      }
+
+      // Borde superior de "Sobre mí": scroll arriba => volver y reproducir en reversa
+      if (dir === 'up' && isAtEnd() && window.scrollY <= sobreMiTop() + 4) {
+        navigate('animacion');
+        return true;
+      }
+
+      return false;
+    }
+
+    // Rueda / trackpad
+    window.addEventListener(
+      'wheel',
+      (e) => {
+        if (e.deltaY === 0) return;
+        if (handleIntent(e.deltaY > 0 ? 'down' : 'up')) e.preventDefault();
+      },
+      { passive: false }
+    );
+
+    // Teclado
+    window.addEventListener('keydown', (e) => {
+      const el = e.target as HTMLElement;
+      if (el.closest('input, textarea, select, [contenteditable="true"]')) return;
+
+      const down = e.key === 'ArrowDown' || e.key === 'PageDown' || (e.key === ' ' && !e.shiftKey);
+      const up = e.key === 'ArrowUp' || e.key === 'PageUp' || (e.key === ' ' && e.shiftKey);
+      if (!down && !up) return;
+
+      if (handleIntent(down ? 'down' : 'up')) e.preventDefault();
+    });
+
+    // Táctil
+    let touchY = 0;
+    let touchDone = false;
+    window.addEventListener(
+      'touchstart',
+      (e) => {
+        touchY = e.touches[0].clientY;
+        touchDone = false;
+      },
+      { passive: true }
+    );
+    window.addEventListener(
+      'touchmove',
+      (e) => {
+        if (touchDone) {
+          e.preventDefault();
+          return;
+        }
+        const dy = touchY - e.touches[0].clientY;
+        if (Math.abs(dy) < 4) {
+          if (phase !== 'idle') e.preventDefault();
+          return;
+        }
+        if (handleIntent(dy > 0 ? 'down' : 'up')) {
+          touchDone = true; // un gesto = una acción
+          e.preventDefault();
+        }
+      },
+      { passive: false }
+    );
+
+    // Botones del navbar (siempre pueden interrumpir lo que esté en curso)
+    document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]').forEach((link) => {
+      link.addEventListener('click', (e) => {
+        const id = link.getAttribute('href')!.slice(1);
+        if (!id || !document.getElementById(id)) return;
+        e.preventDefault();
+        navigate(id);
+      });
+    });
+
+    /* ---------- Precarga + arranque automático ---------- */
+    let loaded = 0;
+    for (let i = 0; i < frameCount; i++) {
+      const img = new Image();
+      img.src = frameSrc(i);
+      img.onload = img.onerror = () => {
+        loaded++;
+        progressText.textContent = String(Math.round((loaded / frameCount) * 100));
+        if (i === 0) render(true);
+
+        if (loaded === frameCount) {
+          loader.style.opacity = '0';
+          loader.style.pointerEvents = 'none';
+          render(true);
+
+          phase = 'idle';
+          navigate('sobre-mi'); // animación de 3 s y bajada a "Sobre mí"
+        }
+      };
+      images[i] = img;
+    }
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+  }
+</script>

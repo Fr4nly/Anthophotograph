@@ -1,0 +1,287 @@
+---
+const card =
+  'group relative overflow-hidden rounded-3xl border border-lime-700/60 bg-lime-900/10 p-6 shadow-xl ring-1 ring-lime-800 backdrop-blur-sm transition-colors duration-300 hover:border-lime-500';
+const spot =
+  'pointer-events-none absolute inset-0 z-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-[radial-gradient(280px_circle_at_var(--x,50%)_var(--y,50%),rgba(163,230,53,0.16),transparent_70%)]';
+const label = 'text-xs uppercase tracking-[0.2em] text-lime-500';
+const iconBox =
+  'grid size-11 shrink-0 place-items-center rounded-xl bg-lime-500/10 text-lime-500 ring-1 ring-lime-500/20';
+
+const input =
+  'w-full rounded-2xl border border-lime-700/60 bg-black/20 py-3.5 pr-4 pl-12 text-[#f4f3ef] placeholder:text-white/40 outline-none transition-colors duration-300 hover:border-lime-500/70 focus:border-lime-400 focus:ring-2 focus:ring-lime-500/30 aria-[invalid=true]:border-red-400 aria-[invalid=true]:ring-2 aria-[invalid=true]:ring-red-500/20';
+const fieldIcon =
+  'pointer-events-none absolute left-4 text-lime-500 transition-colors peer-focus:text-lime-300';
+const errorText = 'mt-2 hidden text-sm text-red-400';
+---
+
+<section id="contactame" data-contact class="font-carter relative mx-auto w-full max-w-6xl scroll-mt-24 px-4 py-24">
+  <!-- Encabezado -->
+  <div data-reveal class="mb-10">
+    <h2 class="mt-2 text-4xl text-[#f4f3ef] md:text-5xl">
+      Contáctame<span class="text-lime-400">.</span>
+    </h2>
+  </div>
+
+  <div class="grid grid-cols-1 gap-4 lg:grid-cols-5">
+    <!-- Tarjeta de presentación -->
+    <article data-reveal data-spot class={`${card} lg:col-span-2`}>
+      <div class={spot}></div>
+
+      <!-- Lente decorativo -->
+      <svg
+        class="pointer-events-none absolute -right-20 -bottom-20 size-72 animate-[spin_60s_linear_infinite] text-lime-400/10"
+        viewBox="0 0 100 100"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="0.8"
+        aria-hidden="true"
+      >
+        <circle cx="50" cy="50" r="46"></circle>
+        <circle cx="50" cy="50" r="34"></circle>
+        <circle cx="50" cy="50" r="20"></circle>
+        <circle cx="50" cy="50" r="7"></circle>
+        <path d="M50 4v30M50 66v30M4 50h30M66 50h30M17.5 17.5l21 21M61.5 61.5l21 21M82.5 17.5l-21 21M38.5 61.5l-21 21"></path>
+      </svg>
+
+      <div class="relative z-10 flex h-full flex-col">
+        <span class={iconBox}>
+          <svg width="23" height="23"><use href="#icon-mail"></use></svg>
+        </span>
+        <p class={`${label} mt-6`}>Escríbeme</p>
+        <h3 class="mt-2 text-3xl text-[#f4f3ef] md:text-4xl">
+          Hablemos de tu <span class="text-lime-400">proyecto</span>
+        </h3>
+        <p class="mt-4 text-sm leading-relaxed text-white/70">
+          Cuéntame qué tienes en mente: una sesión, una marca o un evento. Rellena el formulario y me pondré en contacto contigo.
+        </p>
+      </div>
+    </article>
+
+    <!-- Formulario -->
+    <article data-reveal data-spot class={`${card} lg:col-span-3`}>
+      <div class={spot}></div>
+
+      <form data-form novalidate class="relative z-10 flex flex-col gap-5">
+        <!-- Nombre completo -->
+        <div>
+          <label for="nombre" class={label}>Nombre completo</label>
+          <div class="relative mt-2 flex items-center">
+            <input
+              id="nombre"
+              name="nombre"
+              type="text"
+              autocomplete="name"
+              placeholder="Tu nombre y apellido"
+              class={`peer ${input}`}
+            />
+            <svg width="23" height="23" class={fieldIcon}><use href="#icon-user"></use></svg>
+          </div>
+          <p data-error-for="nombre" class={errorText}></p>
+        </div>
+
+        <!-- Correo electrónico -->
+        <div>
+          <label for="correo" class={label}>Correo electrónico</label>
+          <div class="relative mt-2 flex items-center">
+            <input
+              id="correo"
+              name="correo"
+              type="email"
+              autocomplete="email"
+              placeholder="tucorreo@ejemplo.com"
+              class={`peer ${input}`}
+            />
+            <svg width="23" height="23" class={fieldIcon}><use href="#icon-mail"></use></svg>
+          </div>
+          <p data-error-for="correo" class={errorText}></p>
+        </div>
+
+        <!-- Mensaje -->
+        <div>
+          <label for="mensaje" class={label}>Mensaje</label>
+          <div class="relative mt-2">
+            <textarea
+              id="mensaje"
+              name="mensaje"
+              rows="5"
+              placeholder="Cuéntame sobre tu proyecto..."
+              class={`peer resize-none ${input}`}
+            ></textarea>
+            <svg width="23" height="23" class={`${fieldIcon} top-4`}><use href="#icon-message"></use></svg>
+          </div>
+          <p data-error-for="mensaje" class={errorText}></p>
+        </div>
+
+        <!-- Estado general del formulario -->
+        <p data-status role="status" aria-live="polite" class="hidden rounded-2xl border px-4 py-3 text-sm"></p>
+
+        <!-- Botón -->
+        <button
+          type="submit"
+          class="group/btn inline-flex items-center justify-center gap-3 self-start rounded-2xl bg-lime-400 px-7 py-3.5 text-[#0b0d0f] transition-all duration-300 hover:bg-lime-300 hover:shadow-lg hover:shadow-lime-500/20 active:scale-95 disabled:pointer-events-none disabled:opacity-60 cursor-pointer"
+        >
+          <span data-btn-text>Enviar</span>
+          <svg
+            width="23"
+            height="23"
+            class="transition-transform duration-300 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1"
+          >
+            <use href="#icon-send"></use>
+          </svg>
+        </button>
+      </form>
+    </article>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const section = document.querySelector<HTMLElement>('[data-contact]');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (section) {
+    /* ---------- Luz que sigue al cursor ---------- */
+    section.querySelectorAll<HTMLElement>('[data-spot]').forEach((el) => {
+      el.addEventListener('pointermove', (e) => {
+        const r = el.getBoundingClientRect();
+        el.style.setProperty('--x', `${e.clientX - r.left}px`);
+        el.style.setProperty('--y', `${e.clientY - r.top}px`);
+      });
+    });
+
+    /* ---------- Formulario ---------- */
+    const form = section.querySelector<HTMLFormElement>('[data-form]')!;
+    const status = section.querySelector<HTMLElement>('[data-status]')!;
+    const submitBtn = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    const btnText = form.querySelector<HTMLElement>('[data-btn-text]')!;
+
+    type Field = HTMLInputElement | HTMLTextAreaElement;
+    const fields = ['nombre', 'correo', 'mensaje'].map(
+      (id) => form.querySelector<Field>(`#${id}`)!
+    );
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    let statusTimer: number | undefined;
+
+    const errorEl = (field: Field) =>
+      form.querySelector<HTMLElement>(`[data-error-for="${field.id}"]`)!;
+
+    function setFieldError(field: Field, message: string | null) {
+      const el = errorEl(field);
+      if (message) {
+        field.setAttribute('aria-invalid', 'true');
+        el.textContent = message;
+        el.classList.remove('hidden');
+      } else {
+        field.removeAttribute('aria-invalid');
+        el.textContent = '';
+        el.classList.add('hidden');
+      }
+    }
+
+    function showStatus(type: 'error' | 'ok', message: string) {
+      window.clearTimeout(statusTimer);
+      status.textContent = message;
+      status.className =
+        'rounded-2xl border px-4 py-3 text-sm ' +
+        (type === 'error'
+          ? 'border-red-400/60 bg-red-500/10 text-red-300'
+          : 'border-lime-500/60 bg-lime-500/10 text-lime-300');
+      if (!reduceMotion) gsap.fromTo(status, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.4 });
+      statusTimer = window.setTimeout(() => status.classList.add('hidden'), 6000);
+    }
+
+    function validate(): boolean {
+      let valid = true;
+      let firstInvalid: Field | null = null;
+
+      for (const field of fields) {
+        const value = field.value.trim();
+        let message: string | null = null;
+
+        if (!value) {
+          message = 'Este campo está incompleto.';
+        } else if (field.id === 'correo' && !emailRegex.test(value)) {
+          message = 'Introduce un correo electrónico válido.';
+        }
+
+        setFieldError(field, message);
+        if (message) {
+          valid = false;
+          firstInvalid ??= field;
+        }
+      }
+
+      firstInvalid?.focus();
+      return valid;
+    }
+
+    // Al escribir, se quita el error de ese campo
+    fields.forEach((field) =>
+      field.addEventListener('input', () => {
+        if (field.getAttribute('aria-invalid') === 'true') setFieldError(field, null);
+      })
+    );
+
+    /*
+      Envío del mensaje. Ahora mismo solo simula el envío.
+      Para enviarlo de verdad con EmailJS (ya cargado en Layout.astro):
+
+      await (window as any).emailjs.send(
+        'TU_SERVICE_ID',
+        'TU_TEMPLATE_ID',
+        data,
+        { publicKey: 'TU_PUBLIC_KEY' }
+      );
+    */
+    async function sendMessage(data: Record<string, string>) {
+      console.log('Mensaje listo para enviar:', data);
+      await new Promise((resolve) => setTimeout(resolve, 800));
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!validate()) {
+        showStatus('error', 'El formulario está incompleto. Revisa los campos marcados.');
+        return;
+      }
+
+      const data = Object.fromEntries(
+        fields.map((f) => [f.name, f.value.trim()])
+      ) as Record<string, string>;
+
+      submitBtn.disabled = true;
+      btnText.textContent = 'Enviando...';
+
+      try {
+        await sendMessage(data);
+        form.reset();                              // limpia todos los campos
+        fields.forEach((f) => setFieldError(f, null));
+        showStatus('ok', '¡Mensaje enviado! Gracias por escribirme.');
+      } catch {
+        showStatus('error', 'No se pudo enviar el mensaje. Inténtalo de nuevo.');
+      } finally {
+        submitBtn.disabled = false;
+        btnText.textContent = 'Enviar';
+      }
+    });
+
+    /* ---------- Aparición con scroll ---------- */
+    if (!reduceMotion) {
+      gsap.from(section.querySelectorAll('[data-reveal]'), {
+        opacity: 0,
+        y: 30,
+        duration: 0.8,
+        stagger: 0.12,
+        ease: 'power3.out',
+        clearProps: 'all',
+        scrollTrigger: { trigger: section, start: 'top 75%', once: true },
+      });
+    }
+  }
+</script>

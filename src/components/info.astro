@@ -1,0 +1,348 @@
+---
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+// Pon tu foto en /public con este nombre (o cambia la ruta)
+const fotoSrc = `${base}/Perfil-Anthony.jpg`;
+
+const card =
+  'group relative overflow-hidden rounded-3xl border border-lime-700/60 bg-lime-900/10 p-6 shadow-xl ring-1 ring-lime-800 backdrop-blur-sm transition-colors duration-300 hover:border-lime-500';
+const spot =
+  'pointer-events-none absolute inset-0 z-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-[radial-gradient(280px_circle_at_var(--x,50%)_var(--y,50%),rgba(163,230,53,0.16),transparent_70%)]';
+const label = 'text-xs font-medium uppercase tracking-[0.2em] text-lime-500';
+const iconBox =
+  'grid size-11 shrink-0 place-items-center rounded-xl bg-lime-500/10 text-lime-500 ring-1 ring-lime-500/20';
+
+const especialidades = [
+  {
+    titulo: 'Retrato & Moda',
+    desc: 'Retratos editoriales y de moda que revelan personalidad. Luz natural o estudio, siempre auténtico.',
+    icon: '<circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"></path>',
+  },
+  {
+    titulo: 'Fotografía Comercial',
+    desc: 'Productos, marcas y campañas. Imágenes que comunican el valor de tu negocio y convierten.',
+    icon: '<path d="M5 8h14l-1 12H6L5 8z"></path><path d="M9 8V6a3 3 0 016 0v2"></path>',
+  },
+  {
+    titulo: 'Naturaleza & Paisaje',
+    desc: 'Paisajes, entornos naturales y viajes. Cada escena capturada en su momento perfecto de luz.',
+    icon: '<path d="M3 20l6-10 4 6 3-4 5 8H3z"></path><circle cx="17" cy="6" r="1.5"></circle>',
+  },
+  {
+    titulo: 'Eventos & Bodas',
+    desc: 'Momentos únicos e irrepetibles. Cobertura discreta y completa del día más importante.',
+    icon: '<path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"></path>',
+  },
+];
+---
+
+
+<section id="sobre-mi" data-about class="font-carter relative mx-auto w-full max-w-6xl scroll-mt-24 px-4 py-24">
+  <!-- Encabezado -->
+  <div data-reveal class="mb-10">
+    <h2 class="font-carter mt-2 text-4xl text-[#f4f3ef] md:text-5xl">
+      Detrás de la <span class="text-lime-400">cámara</span>
+    </h2>
+  </div>
+
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-6">
+    <!-- FOTO (única) -->
+    <article
+      data-reveal
+      data-spot
+      class="group relative aspect-4/5 overflow-hidden rounded-3xl border border-lime-700/60 bg-lime-900/10 shadow-xl ring-1 ring-lime-800 transition-colors duration-300 hover:border-lime-500 md:col-span-2 md:row-span-3 md:aspect-auto md:min-h-120"
+    >
+      <!-- Placeholder visible si aún no hay foto -->
+      <div class="absolute inset-0 grid place-items-center bg-linear-to-br from-lime-900/30 via-[#0b0d0f] to-[#0b0d0f] text-lime-500/40">
+        <svg width="64" height="64"><use href="#icon-camera"></use></svg>
+      </div>
+
+      <img
+        data-photo
+        src={fotoSrc}
+        alt="Retrato de Anthophotograph"
+        loading="lazy"
+        onerror="this.style.display='none'"
+        class="absolute inset-0 h-full w-full object-cover"
+      />
+
+      <!-- Degradado inferior -->
+      <div class="pointer-events-none absolute inset-0 bg-linear-to-t from-[#0b0d0f]/90 via-[#0b0d0f]/10 to-transparent"></div>
+
+      <!-- Esquinas de visor de cámara -->
+      <span class="pointer-events-none absolute top-4 left-4 size-6 rounded-tl-lg border-t-2 border-l-2 border-lime-400/80"></span>
+      <span class="pointer-events-none absolute top-4 right-4 size-6 rounded-tr-lg border-t-2 border-r-2 border-lime-400/80"></span>
+      <span class="pointer-events-none absolute bottom-4 left-4 size-6 rounded-bl-lg border-b-2 border-l-2 border-lime-400/80"></span>
+      <span class="pointer-events-none absolute right-4 bottom-4 size-6 rounded-br-lg border-r-2 border-b-2 border-lime-400/80"></span>
+
+    </article>
+
+    <!-- NOMBRE -->
+    <article data-reveal data-spot class={`${card} md:col-span-4`}>
+      <div class={spot}></div>
+
+      <!-- Lente decorativo -->
+      <svg
+        class="pointer-events-none absolute -top-16 -right-16 size-64 animate-[spin_60s_linear_infinite] text-lime-400/15"
+        viewBox="0 0 100 100"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="0.8"
+        aria-hidden="true"
+      >
+        <circle cx="50" cy="50" r="46"></circle>
+        <circle cx="50" cy="50" r="34"></circle>
+        <circle cx="50" cy="50" r="20"></circle>
+        <circle cx="50" cy="50" r="7"></circle>
+        <path d="M50 4v30M50 66v30M4 50h30M66 50h30M17.5 17.5l21 21M61.5 61.5l21 21M82.5 17.5l-21 21M38.5 61.5l-21 21"></path>
+      </svg>
+
+      <div class="relative z-10">
+        <p class={label}>Nombre</p>
+        <p class="font-carter mt-4 text-4xl text-[#f4f3ef] md:text-5xl">
+          Antho<span class="text-lime-400">photograph</span>
+        </p>
+      </div>
+    </article>
+
+    <!-- EXPERIENCIA -->
+    <article data-reveal data-spot class={`${card} md:col-span-2`}>
+      <div class={spot}></div>
+      <div class="relative z-10">
+        <p class={label}>Experiencia</p>
+        <p class="mt-4 flex items-baseline gap-2">
+          <span class="font-carter text-6xl text-lime-400">
+            +<span data-count="8">8</span>
+          </span>
+          <span class="text-lg text-white/70">años</span>
+        </p>
+
+        
+      </div>
+    </article>
+
+    <!-- SESIONES -->
+    <article data-reveal data-spot class={`${card} md:col-span-2`}>
+      <div class={spot}></div>
+      <div class="relative z-10">
+        <p class={label}>Sesiones</p>
+        <p class="mt-4 flex items-baseline gap-2">
+          <span class="font-carter text-6xl text-lime-400">
+            +<span data-count="450">450</span>
+          </span>
+          <span class="text-lg text-white/70">completadas</span>
+        </p>
+
+        
+      </div>
+    </article>
+
+    <!-- UBICACIÓN -->
+    <article data-reveal data-spot class={`${card} md:col-span-4`}>
+      <div class={spot}></div>
+
+      <!-- Globo decorativo -->
+      <svg
+        class="pointer-events-none absolute top-1/2 -right-10 size-56 -translate-y-1/2 text-lime-400/20"
+        viewBox="0 0 100 100"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="0.8"
+        aria-hidden="true"
+      >
+        <circle cx="50" cy="50" r="46"></circle>
+        <ellipse cx="50" cy="50" rx="20" ry="46"></ellipse>
+        <ellipse cx="50" cy="50" rx="38" ry="46"></ellipse>
+        <path d="M50 4v92M4 50h92M10 30h80M10 70h80"></path>
+      </svg>
+
+      <div class="relative z-10 flex items-center gap-4">
+        <div>
+          <p class={label}>Ubicación</p>
+          <p class="mt-2 flex items-center gap-3 text-xl font-semibold text-[#f4f3ef] md:text-2xl">
+           
+            Disponible internacionalmente
+          </p>
+        </div>
+      </div>
+    </article>
+
+    <!-- EQUIPO -->
+    <article data-reveal class={`${card} md:col-span-6`}>
+      <h3 class="font-carter text-2xl text-[#f4f3ef]">Equipo</h3>
+
+      <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <!-- Cámara -->
+        <div data-spot class="group/item relative overflow-hidden rounded-2xl border border-lime-700/40 bg-black/20 p-5 transition-colors hover:border-lime-500/70">
+          <div class={spot}></div>
+          <div class="relative z-10">
+            <span class={iconBox}>
+              <svg width="25" height="25"><use href="#icon-camera"></use></svg>
+            </span>
+            <p class={`${label} mt-4`}>Cámara</p>
+            <ul class="mt-3 flex list-none flex-wrap gap-2 p-0">
+              <li class="rounded-xl border border-lime-700/60 bg-lime-500/10 px-3 py-1.5 text-sm text-white/85">Full-Frame High Res</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Objetivos -->
+        <div data-spot class="group/item relative overflow-hidden rounded-2xl border border-lime-700/40 bg-black/20 p-5 transition-colors hover:border-lime-500/70">
+          <div class={spot}></div>
+          <div class="relative z-10">
+            <span class={iconBox}>
+              <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="9"></circle>
+                <circle cx="12" cy="12" r="5"></circle>
+                <circle cx="12" cy="12" r="1.5"></circle>
+              </svg>
+            </span>
+            <p class={`${label} mt-4`}>Objetivos</p>
+            <ul class="mt-3 flex list-none flex-wrap gap-2 p-0">
+              {['35mm', '85mm', '70–200mm'].map((o) => (
+                <li class="rounded-xl border border-lime-700/60 bg-lime-500/10 px-3 py-1.5 text-sm text-white/85">{o}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <!-- Software -->
+        <div data-spot class="group/item relative overflow-hidden rounded-2xl border border-lime-700/40 bg-black/20 p-5 transition-colors hover:border-lime-500/70">
+          <div class={spot}></div>
+          <div class="relative z-10">
+            <span class={iconBox}>
+              <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+                <path d="M4 7h10M18 7h2M4 17h2M10 17h10"></path>
+                <circle cx="16" cy="7" r="2"></circle>
+                <circle cx="8" cy="17" r="2"></circle>
+              </svg>
+            </span>
+            <p class={`${label} mt-4`}>Software</p>
+            <ul class="mt-3 flex list-none flex-wrap gap-2 p-0">
+              {['Lightroom', 'Capture One'].map((s) => (
+                <li class="rounded-xl border border-lime-700/60 bg-lime-500/10 px-3 py-1.5 text-sm text-white/85">{s}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </article>
+
+            <!-- ESPECIALIDADES -->
+    <div class="md:col-span-6">
+      <!-- Título de la sección -->
+      <div data-reveal class="mt-6 mb-5">
+        <h3 class="text-3xl text-[#f4f3ef] md:text-4xl">
+          <span class="text-lime-400">Especialidad</span>
+        </h3>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {especialidades.map((esp, i) => (
+          <article data-reveal data-spot class={card}>
+            <div class={spot}></div>
+
+            <!-- Número decorativo -->
+            <span class="pointer-events-none absolute top-3 right-5 z-0 text-6xl text-lime-400/10 transition-colors duration-300 group-hover:text-lime-400/20">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+
+            <div class="relative z-10 flex h-full flex-col">
+              <span class={iconBox}>
+                <svg
+                  width="25"
+                  height="25"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                  set:html={esp.icon}
+                />
+              </span>
+
+              <h4 class="mt-5 text-2xl text-[#f4f3ef]">{esp.titulo}</h4>
+              <p class="mt-3 text-sm leading-relaxed text-white/70">{esp.desc}</p>
+            </div>
+
+            <!-- Línea de acento que crece al pasar el cursor -->
+            <span class="absolute bottom-0 left-0 h-0.5 w-0 bg-lime-400 transition-all duration-500 group-hover:w-full"></span>
+          </article>
+        ))}
+      </div>
+    </div>
+
+
+
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const section = document.querySelector<HTMLElement>('[data-about]');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (section) {
+    // Luz que sigue al cursor dentro de cada tarjeta
+    section.querySelectorAll<HTMLElement>('[data-spot]').forEach((el) => {
+      el.addEventListener('pointermove', (e) => {
+        const r = el.getBoundingClientRect();
+        el.style.setProperty('--x', `${e.clientX - r.left}px`);
+        el.style.setProperty('--y', `${e.clientY - r.top}px`);
+      });
+    });
+
+    if (!reduceMotion) {
+      // Aparición escalonada
+      gsap.from(section.querySelectorAll('[data-reveal]'), {
+        opacity: 0,
+        y: 30,
+        duration: 0.8,
+        stagger: 0.1,
+        ease: 'power3.out',
+        clearProps: 'all',
+        scrollTrigger: { trigger: section, start: 'top 75%', once: true },
+      });
+
+      // Parallax suave de la foto
+      const photo = section.querySelector<HTMLElement>('[data-photo]');
+      if (photo) {
+        gsap.fromTo(
+          photo,
+          { scale: 1.18, yPercent: -4 },
+          {
+            scale: 1,
+            yPercent: 4,
+            ease: 'none',
+            scrollTrigger: { trigger: photo.parentElement, start: 'top bottom', end: 'bottom top', scrub: true },
+          }
+        );
+      }
+
+      // Contadores
+      section.querySelectorAll<HTMLElement>('[data-count]').forEach((el) => {
+        const target = Number(el.dataset.count);
+        const counter = { value: 0 };
+        el.textContent = '0';
+
+        ScrollTrigger.create({
+          trigger: el,
+          start: 'top 85%',
+          once: true,
+          onEnter: () =>
+            gsap.to(counter, {
+              value: target,
+              duration: 1.6,
+              ease: 'power2.out',
+              onUpdate: () => (el.textContent = String(Math.round(counter.value))),
+            }),
+        });
+      });
+    }
+  }
+</script>
