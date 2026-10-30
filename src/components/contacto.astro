@@ -140,6 +140,15 @@ const errorText = 'mt-2 hidden text-sm text-red-400';
 
   gsap.registerPlugin(ScrollTrigger);
 
+  /* ---------- Configuración de EmailJS ---------- */
+  // Cópialos desde tu panel de EmailJS:
+  //   Service ID  -> Email Services
+  //   Template ID -> Email Templates
+  //   Public Key  -> Account > General
+  const EMAILJS_SERVICE_ID = 'TU_SERVICE_ID';
+  const EMAILJS_TEMPLATE_ID = 'TU_TEMPLATE_ID';
+  const EMAILJS_PUBLIC_KEY = 'TU_PUBLIC_KEY';
+
   const section = document.querySelector<HTMLElement>('[data-contact]');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -227,20 +236,18 @@ const errorText = 'mt-2 hidden text-sm text-red-400';
       })
     );
 
-    /*
-      Envío del mensaje. Ahora mismo solo simula el envío.
-      Para enviarlo de verdad con EmailJS (ya cargado en Layout.astro):
-
-      await (window as any).emailjs.send(
-        'TU_SERVICE_ID',
-        'TU_TEMPLATE_ID',
-        data,
-        { publicKey: 'TU_PUBLIC_KEY' }
-      );
-    */
+        /* ---------- Envío con EmailJS ---------- */
+    // Variables que recibe la plantilla: {{nombre}}, {{correo}} y {{mensaje}}
     async function sendMessage(data: Record<string, string>) {
-      console.log('Mensaje listo para enviar:', data);
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      const emailjs = (window as any).emailjs;
+      if (!emailjs) throw new Error('EmailJS no se ha cargado');
+
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        data, // { nombre, correo, mensaje }
+        { publicKey: EMAILJS_PUBLIC_KEY }
+      );
     }
 
     form.addEventListener('submit', async (e) => {
@@ -263,7 +270,8 @@ const errorText = 'mt-2 hidden text-sm text-red-400';
         form.reset();                              // limpia todos los campos
         fields.forEach((f) => setFieldError(f, null));
         showStatus('ok', '¡Mensaje enviado! Gracias por escribirme.');
-      } catch {
+      } catch (err) {
+        console.error('Error al enviar con EmailJS:', err);
         showStatus('error', 'No se pudo enviar el mensaje. Inténtalo de nuevo.');
       } finally {
         submitBtn.disabled = false;
