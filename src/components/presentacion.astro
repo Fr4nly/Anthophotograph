@@ -1,22 +1,35 @@
 ---
-const FRAME_COUNT = 240;
-const FRAMES_DIR = 'frames'; // cámbialo a 'frames-min' si usas el script opcional del apartado 5
+import { readdirSync } from 'node:fs';
+
+// ── Configuración de rutas (carpetas dentro de /public) ─────────────────────
+const DIR_LG = 'frames';        // carpeta para escritorio
+const DIR_SM = 'frames';        // carpeta para móvil (puede ser la misma)
+const PREFIX = 'ezgif-frame-';  // cómo empieza el nombre de cada archivo
+const EXT = 'webp';             // extensión
+// ────────────────────────────────────────────────────────────────────────────
+
+const FRAME_COUNT = readdirSync(`public/${DIR_LG}`).filter((f: string) =>
+  f.toLowerCase().endsWith(`.${EXT}`)
+).length;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
 
-<!-- ... tu contenido actual de presentación ... -->
+<!-- ... tu contenido actual de presentación (si lo tienes) ... -->
 
 <section
   id="animacion"
   data-frame-scroll
   data-frame-count={FRAME_COUNT}
-  data-dir={FRAMES_DIR}
+  data-dir-lg={DIR_LG}
+  data-dir-sm={DIR_SM}
+  data-prefix={PREFIX}
+  data-ext={EXT}
   data-base={base}
   class="relative flex h-screen w-full items-center justify-center px-4"
 >
   <!-- Tarjeta -->
   <div
-    class="relative h-[77vh] w-full max-w-6xl overflow-hidden rounded-3xl border border-lime-700/60 bg-[#0b0d0f] shadow-2xl shadow-lime-900/30 ring-1 ring-lime-800"
+    class="relative h-[70vh] w-full max-w-6xl overflow-hidden rounded-3xl border border-lime-700/60 bg-[#0b0d0f] shadow-2xl shadow-lime-900/30 ring-1 ring-lime-800"
   >
     <canvas class="absolute inset-0 h-full w-full"></canvas>
 
@@ -40,14 +53,15 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
   gsap.registerPlugin(ScrollToPlugin);
 
-  const DURATION = 3;     // segundos que tarda la animación completa (de 1er a último frame)
-  const SCROLL_TIME = 1;  // segundos del desplazamiento entre secciones
+  const DURATION = 3;      // segundos que tarda la animación completa
+  const SCROLL_TIME = 1;   // segundos del desplazamiento entre secciones
+  const GATE_STRIDE = 4;   // arranca cuando está cargado 1 de cada 4 frames (2 = arranque más tardío pero más fino)
 
   const section = document.querySelector<HTMLElement>('[data-frame-scroll]');
 
   if (section) {
     const canvas = section.querySelector<HTMLCanvasElement>('canvas')!;
-    const ctx = canvas.getContext('2d', { alpha: false })!; // sin transparencia = pinta más rápido
+    const ctx = canvas.getContext('2d', { alpha: false })!;
     const loader = section.querySelector<HTMLElement>('[data-loader]')!;
     const progressText = section.querySelector<HTMLElement>('[data-progress]')!;
     const sobreMi = document.getElementById('sobre-mi');
@@ -55,14 +69,19 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     const frameCount = Number(section.dataset.frameCount);
     const last = frameCount - 1;
     const base = section.dataset.base ?? '';
-    const dir = section.dataset.dir ?? 'frames';
-    const frameSrc = (i: number) =>
-      `${base}/${dir}/ezgif-frame-${String(i + 1).padStart(3, '0')}.jpg`;
 
     const coarse = window.matchMedia('(pointer: coarse)').matches;
+    const small = window.matchMedia('(max-width: 767px)').matches;
+    const dir = small ? section.dataset.dirSm! : section.dataset.dirLg!;
+    const prefix = section.dataset.prefix ?? 'frame-';
+    const ext = section.dataset.ext ?? 'webp';
     const maxDpr = coarse ? 1.5 : 2;
 
+    const frameSrc = (i: number) =>
+      `${base}/${dir}/${prefix}${String(i + 1).padStart(3, '0')}.${ext}`;
+
     const images: HTMLImageElement[] = new Array(frameCount);
+    const ready = new Uint8Array(frameCount); // 1 = frame cargado y decodificado
     const state = { frame: 0 };
     let lastDrawn = -1;
 
@@ -97,24 +116,28 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
       const w = Math.round(canvas.clientWidth * dpr);
       const h = Math.round(canvas.clientHeight * dpr);
-      if (w === canvas.width && h === canvas.height) return; // nada que hacer
+      if (w === canvas.width && h === canvas.height) return;
       canvas.width = w;
       canvas.height = h;
       render(true);
     }
 
+    // Si el frame pedido aún no cargó, usa el anterior más cercano que sí esté listo
+    function pickFrame(index: number) {
+      for (let i = index; i >= 0; i--) if (ready[i]) return i;
+      return -1;
+    }
+
     function render(force = false) {
-      const index = Math.round(state.frame);
+      const index = pickFrame(Math.round(state.frame));
+      if (index < 0) return;
       if (!force && index === lastDrawn) return;
 
       const img = images[index];
-      if (!img || !img.complete || !img.naturalWidth) return;
-
       const scale = Math.max(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight);
       const w = img.naturalWidth * scale;
       const h = img.naturalHeight * scale;
 
-      // El frame cubre todo el canvas, así que no hace falta borrarlo antes
       ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
       lastDrawn = index;
     }
@@ -167,6 +190,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       const heroOffset = () => Math.abs(section!.getBoundingClientRect().top);
 
       if (id === 'animacion') {
+        // Subir al hero (si estamos debajo) y reproducir la animación en reversa
         if (heroOffset() > 2) {
           setPhase('scroll');
           await scrollToEl(section!);
@@ -176,6 +200,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         await tweenFrames(0, frameTime(state.frame, 0));
         if (stale()) return;
       } else {
+        // Sin nada en curso y animación sin completar: reproducirla antes de bajar
         if (!interrupting && !isAtEnd()) {
           if (heroOffset() > 2) {
             setPhase('scroll');
@@ -187,6 +212,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
           if (stale()) return;
         }
 
+        // Si se interrumpió, ir directo a la sección; los frames terminan mientras se desplaza
         setPhase('scroll');
         if (!isAtEnd()) tweenFrames(last, Math.min(SCROLL_TIME, frameTime(state.frame, last)));
         await scrollToEl(target);
@@ -206,19 +232,23 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     function handleIntent(dir: 'down' | 'up'): boolean {
       if (phase === 'loading') return true;
 
+      // Animación en curso: scroll abajo la corta y muestra "Sobre mí"
       if (phase === 'play') {
         if (dir === 'down') navigate('sobre-mi');
         return true;
       }
 
+      // Desplazándose entre secciones: ignorar el scroll del usuario
       if (phase === 'scroll') return true;
       if (performance.now() < cooldownUntil) return true;
 
+      // Hero con la animación sin completar: scroll abajo => animar y bajar
       if (dir === 'down' && !isAtEnd() && window.scrollY < heroEnd - 4) {
         navigate('sobre-mi');
         return true;
       }
 
+      // Borde superior de "Sobre mí": scroll arriba => volver y reproducir en reversa
       if (dir === 'up' && isAtEnd() && window.scrollY <= heroEnd + 4) {
         navigate('animacion');
         return true;
@@ -260,8 +290,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     function needsIntercept() {
       if (phase !== 'idle') return true;
       const y = window.scrollY;
-      if (!isAtEnd()) return y < heroEnd - 4;  // hero con la animación sin completar
-      return y <= heroEnd + 160;               // cerca del borde superior de "Sobre mí"
+      if (!isAtEnd()) return y < heroEnd - 4; // hero con la animación sin completar
+      return y <= heroEnd + 160;              // cerca del borde superior de "Sobre mí"
     }
 
     function syncIntercept() {
@@ -323,31 +353,78 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       });
     });
 
-    /* ---------- Precarga (con límite de descargas simultáneas) ---------- */
-    const concurrency = coarse ? 6 : 12;
-    let next = 0;
-    let loaded = 0;
+    /* ---------- Precarga progresiva ---------- */
+    // Orden de descarga: primero 1 de cada 8 (+ el último), luego 1 de cada 4, 2 y por último el resto.
+    // Así hay una versión "gruesa" de la animación casi al instante y se va afinando sola.
+    const order: number[] = [];
+    const queued = new Uint8Array(frameCount);
+    const enqueue = (i: number) => {
+      if (!queued[i]) {
+        queued[i] = 1;
+        order.push(i);
+      }
+    };
+
+    enqueue(0);
+    enqueue(last);
+    for (const stride of [8, 4, 2, 1]) {
+      for (let i = 0; i < frameCount; i += stride) enqueue(i);
+    }
+
+    // Puerta de arranque: frames que deben estar listos antes de empezar
+    const gate = new Set<number>([0, last]);
+    for (let i = 0; i < frameCount; i += GATE_STRIDE) gate.add(i);
+    let gateLeft = gate.size;
+    let started = false;
+
+    function start() {
+      if (started) return;
+      started = true;
+
+      if (ready.some((v) => v === 1)) {
+        loader.style.opacity = '0';
+        loader.style.pointerEvents = 'none';
+        render(true);
+      } else {
+        // Ningún frame cargó: se deja el aviso visible y la página sigue funcionando
+        loader.querySelector('p')!.textContent =
+          'No se encontraron los frames. Revisa la consola (F12).';
+      }
+
+      setPhase('idle');
+      navigate('sobre-mi'); // animación de 3 s y bajada a "Sobre mí"
+    }
+
+    const concurrency = coarse ? 6 : 10;
+    let cursor = 0;
 
     function loadNext() {
-      if (next >= frameCount) return;
-      const i = next++;
+      if (cursor >= order.length) return;
+      const i = order[cursor++];
       const img = new Image();
       img.decoding = 'async';
-      img.onload = img.onerror = () => {
-        loaded++;
-        progressText.textContent = String(Math.round((loaded / frameCount) * 100));
-        if (i === 0) render(true);
 
-        if (loaded === frameCount) {
-          loader.style.opacity = '0';
-          loader.style.pointerEvents = 'none';
-          render(true);
+      const done = () => {
+        ready[i] = img.naturalWidth > 0 ? 1 : 0;
 
-          setPhase('idle');
-          navigate('sobre-mi'); // animación de 3 s y bajada a "Sobre mí"
-          return;
+        if (gate.has(i)) {
+          gateLeft--;
+          progressText.textContent = String(
+            Math.round(((gate.size - gateLeft) / gate.size) * 100)
+          );
+          if (i === 0) render(true);
+          if (gateLeft === 0) start();
         }
         loadNext();
+      };
+
+      img.onload = () => {
+        // Decodifica antes de usarlo, para que dibujarlo no bloquee la animación
+        img.decode().then(done, done);
+      };
+      img.onerror = () => {
+        if (i === 0) console.error('No se pudo cargar el frame:', img.src);
+        done();
       };
       img.src = frameSrc(i);
       images[i] = img;

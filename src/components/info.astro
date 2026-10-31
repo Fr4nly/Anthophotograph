@@ -2,7 +2,7 @@
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 // Pon tu foto en /public con este nombre (o cambia la ruta)
-const fotoSrc = `${base}/Perfil-Anthony.jpg`;
+const fotoSrc = `${base}/Perfil-Anthony.webp`;
 
 const card =
   'group relative overflow-hidden rounded-3xl border border-lime-700/60 bg-lime-900/10 p-6 shadow-xl ring-1 ring-lime-800 backdrop-blur-sm transition-colors duration-300 hover:border-lime-500';
@@ -57,11 +57,12 @@ const especialidades = [
         <svg width="64" height="64"><use href="#icon-camera"></use></svg>
       </div>
 
-            <img
+                  <img
         data-photo
         src={fotoSrc}
         alt="Retrato de Anthophotograph"
-        loading="lazy"
+        loading="eager"
+        fetchpriority="low"
         decoding="async"
         onerror="this.style.display='none'"
         class="absolute inset-0 h-full w-full object-cover will-change-transform"

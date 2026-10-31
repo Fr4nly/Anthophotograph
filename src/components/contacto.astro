@@ -238,9 +238,8 @@ const errorText = 'mt-2 hidden text-sm text-red-400';
 
         /* ---------- Envío con EmailJS ---------- */
     // Variables que recibe la plantilla: {{nombre}}, {{correo}} y {{mensaje}}
-    async function sendMessage(data: Record<string, string>) {
-      const emailjs = (window as any).emailjs;
-      if (!emailjs) throw new Error('EmailJS no se ha cargado');
+        async function sendMessage(data: Record<string, string>) {
+      const emailjs = await loadEmailJS();
 
       await emailjs.send(
         EMAILJS_SERVICE_ID,
@@ -248,7 +247,31 @@ const errorText = 'mt-2 hidden text-sm text-red-400';
         data, // { nombre, correo, mensaje }
         { publicKey: EMAILJS_PUBLIC_KEY }
       );
+    }``
+
+        /* ---------- EmailJS: se carga solo cuando se necesita ---------- */
+    let emailjsLoading: Promise<any> | null = null;
+
+    function loadEmailJS(): Promise<any> {
+      const w = window as any;
+      if (w.emailjs) return Promise.resolve(w.emailjs);
+
+      emailjsLoading ??= new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+        s.async = true;
+        s.onload = () => resolve(w.emailjs);
+        s.onerror = () => {
+          emailjsLoading = null;
+          reject(new Error('EmailJS no se pudo cargar'));
+        };
+        document.head.appendChild(s);
+      });
+      return emailjsLoading;
     }
+
+    // Se adelanta la descarga en cuanto el usuario toca el formulario
+    form.addEventListener('focusin', () => void loadEmailJS().catch(() => {}), { once: true });
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();

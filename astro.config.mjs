@@ -9,4 +9,7 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
+    compressHTML: true,
+  build: { inlineStylesheets: 'always' },
 });
+

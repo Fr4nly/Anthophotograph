@@ -2,6 +2,9 @@
 import "../styles/global.css";
 import Navbar from "../components/navbar.astro";
 import icons from "../assets/icons.svg?raw";
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const fontsUrl =
+  'https://fonts.googleapis.com/css2?family=Carter+One&family=Expletus+Sans:wght@400;500;600;700&display=swap';
 
 // Cada círculo: tamaño y color. La posición y el movimiento son aleatorios en cada carga.
 const blobs = [
@@ -17,21 +20,22 @@ const blobs = [
 
 <!doctype html>
 <html lang="es">
-  <head>
+    <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Antho-Photograph | Portafolio</title>
 
-    <link rel="shortcut icon" href={`${import.meta.env.BASE_URL}favicon.ico`} type="image/x-icon" />
+    <link rel="shortcut icon" href={`${base}/favicon.ico`} type="image/x-icon" />
 
+    <!-- Primer frame de la animación: se descarga desde el primer instante -->
+    <link rel="preload" as="image" type="image/webp" href={`${base}/frames-sm/frame-001.webp`} media="(max-width: 767px)" fetchpriority="high" />
+    <link rel="preload" as="image" type="image/webp" href={`${base}/frames-lg/frame-001.webp`} media="(min-width: 768px)" fetchpriority="high" />
+
+    <!-- Fuentes sin bloquear el pintado (font-display: swap ya viene en la URL) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Carter+One&family=Expletus+Sans:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" defer></script>
+    <link rel="stylesheet" href={fontsUrl} media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href={fontsUrl} /></noscript>
   </head>
 
   <body
