@@ -41,11 +41,11 @@ const blobs = [
     <div style="display:none" set:html={icons} />
 
     <div class="relative isolate min-h-screen overflow-hidden">
-            <!-- FONDO ANIMADO -->
-      <div aria-hidden="true" class="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-[#0b0d0f]">
+             <!-- FONDO ANIMADO -->
+      <div aria-hidden="true" class="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-[#0b0d0f] [contain-strict]">
         {blobs.map((cls) => (
-          <div data-orbit class="absolute inset-0 will-change-transform">
-            <div data-blob class={`absolute rounded-full blur-[90px] will-change-transform ${cls}`}></div>
+          <div data-orbit class="absolute inset-0">
+            <div data-blob class={`blob absolute rounded-full will-change-transform ${cls}`}></div>
           </div>
         ))}
 
@@ -59,7 +59,13 @@ const blobs = [
     </div>
 
         <script>
+
+          
       import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
+ScrollTrigger.config({ ignoreMobileResize: true }); // evita recálculos al mostrar/ocultar la barra del navegador
 
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const slow = reduceMotion ? 2 : 1; // con "reducir movimiento" va más lento, pero se mueve
@@ -117,5 +123,11 @@ const blobs = [
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+    .blob {
+    -webkit-mask-image: radial-gradient(closest-side, #000 25%, transparent 100%);
+    mask-image: radial-gradient(closest-side, #000 25%, transparent 100%);
+    backface-visibility: hidden;
   }
 </style>

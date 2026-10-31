@@ -20,3 +20,11 @@ body {
   min-width: 320px;
   min-height: 100vh;
 }
+
+/* En pantallas táctiles el backdrop-blur de las tarjetas es lo más costoso de pintar */
+@media (hover: none) and (pointer: coarse) {
+  article.backdrop-blur-sm {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
